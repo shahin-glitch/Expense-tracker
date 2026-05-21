@@ -24,6 +24,20 @@ export default function Login() {
     }
   };
 
+  const handleDemoLogin = async () => {
+    setForm({ email: 'demo@example.com', password: 'demo123' });
+    setLoading(true);
+    try {
+      await login('demo@example.com', 'demo123');
+      toast.success('Welcome back BABY.......!');
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Login failed, GAY BOY');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-page">
       <div className="auth-container">
@@ -90,6 +104,24 @@ export default function Login() {
               </motion.button>
             </form>
 
+            <motion.button 
+              type="button" 
+              onClick={handleDemoLogin}
+              disabled={loading}
+              className="btn w-full btn-lg" 
+              style={{ 
+                justifyContent: 'center', 
+                marginTop: 12,
+                background: 'rgba(118, 58, 201, 0.12)',
+                color: 'var(--main-purple)',
+                border: '2px solid var(--main-purple)',
+                fontWeight: 600
+              }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {loading ? 'Loading...' : '🎯 Try Demo Account'}
+            </motion.button>
+
             <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--text-secondary)', marginTop: 24 }}>
               Don't have an account?{' '}
               <Link to="/register" style={{ color: 'var(--main-purple)', textDecoration: 'none', fontWeight: 600 }}>
@@ -105,7 +137,7 @@ export default function Login() {
               color: 'var(--text-secondary)',
               lineHeight: 1.5
             }}>
-              💡 <strong>Demo Mode:</strong> Register a new account to get started, or sign in with your existing details. Or else Messi gonna get another Penalty. 
+              💡 <strong>Demo Mode:</strong> Click "Try Demo Account" to explore with demo@example.com / demo123, or register a new account to get started. 
             </div>
           </div>
         </motion.div>
