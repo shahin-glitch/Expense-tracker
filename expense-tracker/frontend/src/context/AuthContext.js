@@ -8,14 +8,11 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check for existing session (frontend only)
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     if (token && savedUser) {
       setUser(JSON.parse(savedUser));
-      authAPI.getMe().then(res => {
-        setUser(res.data.user);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-      }).catch(() => logout());
     }
     setLoading(false);
   }, []);
