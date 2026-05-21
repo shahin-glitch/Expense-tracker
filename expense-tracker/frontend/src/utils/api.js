@@ -7,12 +7,27 @@ const MOCK_USERS = [
   { id: '2', name: 'Test User', email: 'test@example.com', password: 'test123', currency: 'USD', monthlyBudget: 3000 },
 ];
 
+// Initialize with some demo transactions
+const DEMO_TRANSACTIONS = {
+  '1': [
+    { _id: '1', title: 'Grocery Shopping', category: 'Food', type: 'expense', amount: 125.50, date: new Date(Date.now() - 2*24*60*60*1000).toISOString(), note: 'Weekly groceries', userId: '1', createdAt: new Date().toISOString() },
+    { _id: '2', title: 'Salary', category: 'Income', type: 'income', amount: 3000, date: new Date(Date.now() - 5*24*60*60*1000).toISOString(), note: 'Monthly salary', userId: '1', createdAt: new Date().toISOString() },
+    { _id: '3', title: 'Gas', category: 'Transportation', type: 'expense', amount: 45.00, date: new Date(Date.now() - 3*24*60*60*1000).toISOString(), note: 'Fuel', userId: '1', createdAt: new Date().toISOString() },
+    { _id: '4', title: 'Netflix', category: 'Entertainment', type: 'expense', amount: 15.99, date: new Date(Date.now() - 7*24*60*60*1000).toISOString(), note: 'Monthly subscription', userId: '1', createdAt: new Date().toISOString() },
+    { _id: '5', title: 'Freelance Project', category: 'Income', type: 'income', amount: 500, date: new Date(Date.now() - 10*24*60*60*1000).toISOString(), note: 'Web design project', userId: '1', createdAt: new Date().toISOString() },
+  ]
+};
+
 // Simulate API delay
 const delay = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Utility to get all expenses for user
 const getAllExpenses = (userId) => {
   const data = JSON.parse(localStorage.getItem('mockExpenses') || '{}');
+  // Initialize with demo data if first time
+  if (!data[userId]) {
+    data[userId] = DEMO_TRANSACTIONS[userId] || [];
+  }
   return data[userId] || [];
 };
 
@@ -118,20 +133,54 @@ export const expenseAPI = {
     
     let expenses = getAllExpenses(user.id);
     
+    // Apply filters
+    if (params?.type) {
+      expenses = expenses.filter(e => e.type === params.type);
+    }
+    
+    if (params?.category) {
+      expenses = expenses.filter(e => e.category === params.category);
+    }
+    
+    if (params?.search) {
+      const search = params.search.toLowerCase();
+      expenses = expenses.filter(e => 
+        e.title.toLowerCase().includes(search) || 
+        (e.note && e.note.toLowerCase().includes(search))
+      );
+    }
+    
     // Apply sorting
     if (params?.sortBy === 'date') {
       expenses = expenses.sort((a, b) => {
         const order = params?.order === 'asc' ? 1 : -1;
         return order * (new Date(b.date) - new Date(a.date));
       });
+    } else {
+      // Default sort by date descending
+      expenses = expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
     }
     
-    // Apply limit
-    if (params?.limit) {
-      expenses = expenses.slice(0, params.limit);
-    }
+    // Pagination
+    const limit = params?.limit || 15;
+    const page = params?.page || 1;
+    const total = expenses.length;
+    const pages = Math.ceil(total / limit);
+    const start = (page - 1) * limit;
+    const paginatedExpenses = expenses.slice(start, start + limit);
     
-    return { data: { success: true, expenses } };
+    return { 
+      data: { 
+        success: true, 
+        expenses: paginatedExpenses,
+        pagination: {
+          total,
+          page,
+          limit,
+          pages
+        }
+      } 
+    };
   },
 
   create: async (data) => {
