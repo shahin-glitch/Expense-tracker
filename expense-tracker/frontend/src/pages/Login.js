@@ -112,10 +112,11 @@ export default function Login() {
               style={{ 
                 justifyContent: 'center', 
                 marginTop: 12,
-                background: 'rgba(118, 58, 201, 0.12)',
+                background: 'linear-gradient(135deg, rgba(138, 109, 200, 0.2), rgba(118, 58, 201, 0.2))',
                 color: 'var(--main-purple)',
                 border: '2px solid var(--main-purple)',
-                fontWeight: 600
+                fontWeight: 700,
+                fontSize: 16
               }}
               whileTap={{ scale: 0.98 }}
             >
