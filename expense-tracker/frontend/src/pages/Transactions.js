@@ -105,9 +105,13 @@ export default function Transactions() {
         <motion.div variants={itemVariants} className="card" style={{ padding: 0, overflow: 'hidden' }}>
           {loading ? (
             <div style={{ padding: 60, textAlign: 'center' }}>
-              <div className="skeleton" style={{ height: 400, borderRadius: 16, margin: 32 }} />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
+                <div className="skeleton" style={{ height: 60, width: 60, borderRadius: '50%' }} />
+                <div className="skeleton" style={{ height: 20, width: 200, borderRadius: 8 }} />
+                <div className="skeleton" style={{ height: 400, borderRadius: 16, width: '100%' }} />
+              </div>
             </div>
-          ) : expenses.length > 0 ? (
+          ) : expenses && expenses.length > 0 ? (
             <>
               <div className="table-wrapper">
                 <table className="table" style={{ margin: 0 }}>
@@ -184,11 +188,16 @@ export default function Transactions() {
               )}
             </>
           ) : (
-            <div className="empty-state" style={{ margin: 32 }}>
-              <div className="empty-state-icon">🔍</div>
-              <div className="empty-state-text">No transactions found matching your criteria</div>
+            <div className="empty-state" style={{ margin: 32, padding: '60px 32px', textAlign: 'center' }}>
+              <div className="empty-state-icon" style={{ fontSize: 64, marginBottom: 16 }}>📭</div>
+              <div className="empty-state-text" style={{ marginBottom: 8 }}>No transactions found</div>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: 24, fontSize: 14 }}>
+                {filters.search || filters.type || filters.category 
+                  ? 'Try adjusting your filters or search term'
+                  : 'Start by adding your first transaction'}
+              </p>
               <button className="btn btn-primary" onClick={() => { setEditExpense(null); setShowModal(true); }}>
-                Add Transaction
+                + Add Transaction
               </button>
             </div>
           )}

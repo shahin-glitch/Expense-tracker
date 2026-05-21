@@ -27,13 +27,21 @@ export default function ExpenseModal({ onClose, onSaved, editExpense }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.title.trim() || !form.amount) {
+      toast.error('Please fill in all fields');
+      return;
+    }
     setLoading(true);
     try {
+      const data = {
+        ...form,
+        amount: parseFloat(form.amount)
+      };
       if (editExpense) {
-        await expenseAPI.update(editExpense._id, form);
+        await expenseAPI.update(editExpense._id, data);
         toast.success('Transaction updated!');
       } else {
-        await expenseAPI.create(form);
+        await expenseAPI.create(data);
         toast.success('Transaction added!');
       }
       onSaved();

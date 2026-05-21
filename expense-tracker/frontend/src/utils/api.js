@@ -193,7 +193,12 @@ export const expenseAPI = {
     const expenses = getAllExpenses(user.id);
     const newExpense = {
       _id: Date.now().toString(),
-      ...data,
+      title: data.title || '',
+      amount: parseFloat(data.amount) || 0,
+      type: data.type || 'expense',
+      category: data.category || 'Food & Dining',
+      date: data.date || new Date().toISOString().split('T')[0],
+      note: data.note || '',
       userId: user.id,
       createdAt: new Date().toISOString()
     };
@@ -216,7 +221,15 @@ export const expenseAPI = {
       throw { response: { status: 404, data: { message: 'Expense not found' } } };
     }
     
-    expenses[index] = { ...expenses[index], ...data };
+    expenses[index] = {
+      ...expenses[index],
+      title: data.title || expenses[index].title,
+      amount: parseFloat(data.amount) || expenses[index].amount,
+      type: data.type || expenses[index].type,
+      category: data.category || expenses[index].category,
+      date: data.date || expenses[index].date,
+      note: data.note || expenses[index].note
+    };
     saveExpenses(user.id, expenses);
     
     return { data: { success: true, expense: expenses[index] } };
@@ -248,8 +261,9 @@ export const expenseAPI = {
     
     // Filter by month and year
     const filtered = expenses.filter(e => {
-      const date = new Date(e.date);
-      return date.getMonth() + 1 === month && date.getFullYear() === year;
+      const dateStr = e.date;
+      const [eYear, eMonth] = dateStr.split('-').slice(0, 2).map(Number);
+      return eMonth === month && eYear === year;
     });
     
     // Calculate stats
@@ -267,14 +281,14 @@ export const expenseAPI = {
     // Monthly trend
     const monthlyTrend = [];
     expenses.forEach(e => {
-      const date = new Date(e.date);
-      const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
-      const existing = monthlyTrend.find(m => m._id.year === date.getFullYear() && m._id.month === date.getMonth() + 1 && m._id.type === e.type);
+      const dateStr = e.date;
+      const [eYear, eMonth] = dateStr.split('-').slice(0, 2).map(Number);
+      const existing = monthlyTrend.find(m => m._id.year === eYear && m._id.month === eMonth && m._id.type === e.type);
       if (existing) {
         existing.total += e.amount;
       } else {
         monthlyTrend.push({
-          _id: { year: date.getFullYear(), month: date.getMonth() + 1, type: e.type },
+          _id: { year: eYear, month: eMonth, type: e.type },
           total: e.amount
         });
       }
